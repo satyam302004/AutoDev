@@ -1,0 +1,79 @@
+/* AutoDEV design tokens — matching Munder Difflin pixel-art aesthetic */
+
+:root {
+  /* ── surfaces (cream/paper) ──────────────────────────────────── */
+  --cth-cream-50:  #FFFDF5;
+  --cth-cream-100: #FFF8E7;
+  --cth-cream-200: #F4E9C7;
+  --cth-cream-300: #E8D9A0;
+  --cth-paper-100: #FCFAF0;
+  --cth-paper-200: #F0EAD2;
+
+  /* ── ink (text) ──────────────────────────────────────────────── */
+  --cth-ink-900: #1A1320;
+  --cth-ink-700: #3D2E4A;
+  --cth-ink-500: #6B5878;
+  --cth-ink-300: #A899B5;
+  --cth-ink-100: #D9CFE0;
+
+  /* ── accent colors ───────────────────────────────────────────── */
+  --cth-coral:  #D96A62;
+  --cth-mint:   #5CA97A;
+  --cth-sky:    #4F9FAF;
+  --cth-lemon:  #DCAB3C;
+  --cth-lilac:  #9482D3;
+  --cth-peach:  #D99168;
+
+  /* ── accent light (for portrait tiles) ────────────────────────── */
+  --cth-coral-light:  #F3D3CD;
+  --cth-mint-light:   #D2E7DA;
+  --cth-sky-light:    #CFE5E9;
+  --cth-lemon-light:  #F3E4BC;
+  --cth-lilac-light:  #E0DAF2;
+  --cth-peach-light:  #F3DACA;
+
+  /* ── status colors ───────────────────────────────────────────── */
+  --cth-status-idle:       #A199AB;
+  --cth-status-thinking:   #4F9FAF;
+  --cth-status-working:    #DCAB3C;
+  --cth-status-waiting:    #6D87D6;
+  --cth-status-blocked:    #D96A62;
+  --cth-status-success:    #5CA97A;
+  --cth-status-error:      #D96A62;
+
+  /* ── fonts ────────────────────────────────────────────────────── */
+  --cth-font-display: 'Press Start 2P', monospace;
+  --cth-font-ui:      'Inter', system-ui, sans-serif;
+  --cth-font-mono:    'JetBrains Mono', monospace;
+
+  /* ── type scale ───────────────────────────────────────────────── */
+  --cth-text-display-lg: 16px;
+  --cth-text-display-md: 12px;
+  --cth-text-display-sm: 8px;
+  --cth-text-body-lg:    16px;
+  --cth-text-body-md:    14px;
+  --cth-text-body-sm:    13px;
+  --cth-text-mono-md:    14px;
+  --cth-text-mono-sm:    13px;
+
+  /* ── spacing ──────────────────────────────────────────────────── */
+  --cth-space-1: 4px;
+  --cth-space-2: 8px;
+  --cth-space-3: 12px;
+  --cth-space-4: 16px;
+  --cth-space-5: 20px;
+  --cth-space-6: 24px;
+
+  /* ── shadows ──────────────────────────────────────────────────── */
+  --cth-shadow-hard: 3px 3px 0 rgba(26, 19, 32, 0.14);
+}
+
+/* ── panel border tokens ────────────────────────────────────────────── */
+/* v0.3.4: single hairlines via box-shadow (zero-reflow). */
+/* Dialogs keep one slightly stronger line. */
+:root {
+  --cth-panel-border:          inset 0 0 0 1px var(--cth-ink-300);
+  --cth-panel-border-inset:    inset 0 0 0 1px var(--cth-ink-100);
+  --cth-panel-border-terminal: inset 0 0 0 1px var(--cth-ink-300);
+  --cth-panel-border-dialog:   inset 0 0 0 1px var(--cth-ink-500);
+}

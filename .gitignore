@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+backend/.venv/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Data
+backend/*.db
+backend/*.db-wal
+backend/*.db-shm
+
+# Logs
+*.log
+
+# Playwright
+frontend/test-results/
+frontend/playwright-report/
+frontend/.playwright-mcp/
+.playwright-mcp/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Editor
+.vscode/
+.idea/

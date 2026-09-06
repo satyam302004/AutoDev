@@ -1,0 +1,124 @@
+/* Font imports via @fontsource */
+@import '@fontsource/press-start-2p';
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/700.css';
+
+/* Design tokens */
+@import './design/tokens.css';
+
+/* ── Reset ──────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: var(--cth-font-ui);
+  font-size: var(--cth-text-body-md);
+  line-height: 20px;
+  color: var(--cth-ink-900);
+  background: var(--cth-cream-100);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--cth-cream-200);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--cth-ink-300);
+  border-radius: 0;
+}
+
+/* ── Pixel transitions ──────────────────────────────────────────────── */
+.pixel-transition {
+  transition: all 0.1s steps(2, end);
+}
+
+/* ── Blink animation (status dots) ──────────────────────────────────── */
+@keyframes cth-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.animate-blink {
+  animation: cth-blink 1.2s steps(2, end) infinite;
+}
+
+/* ── Pulse animation (working status) ───────────────────────────────── */
+@keyframes cth-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+.animate-pulse-pixel {
+  animation: cth-pulse 0.8s steps(2, end) infinite;
+}
+
+/* ── Dot flow animation (pipeline edges) ────────────────────────────── */
+@keyframes cth-dotflow {
+  0% { offset-distance: 0%; }
+  100% { offset-distance: 100%; }
+}
+
+/* ── Flow animation (SVG dash) ────────────────────────────────────── */
+@keyframes animate-flow {
+  0% { stroke-dashoffset: 8; }
+  100% { stroke-dashoffset: 0; }
+}
+
+/* ── Sparkle animation (success) ──────────────────────────────────── */
+@keyframes animate-sparkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.3); }
+}
+
+/* ── Scanline effect ────────────────────────────────────────────────── */
+@keyframes cth-scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+/* ── CRT vignette ───────────────────────────────────────────────────── */
+.crt-vignette {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(26, 19, 32, 0.15) 100%);
+}
+
+/* ── Input base ─────────────────────────────────────────────────────── */
+input, select, textarea {
+  font-family: var(--cth-font-ui);
+  font-size: var(--cth-text-body-md);
+  color: var(--cth-ink-900);
+  background: var(--cth-paper-100);
+  border: none;
+  box-shadow: var(--cth-panel-border-inset);
+  padding: var(--cth-space-2) var(--cth-space-3);
+  outline: none;
+}
+input:focus, select:focus, textarea:focus {
+  box-shadow: inset 0 0 0 2px var(--cth-ink-700);
+}
+
+/* ── Utility classes ────────────────────────────────────────────────── */
+.font-display {
+  font-family: var(--cth-font-display);
+}
+.font-mono {
+  font-family: var(--cth-font-mono);
+}
