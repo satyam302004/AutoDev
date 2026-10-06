@@ -113,8 +113,13 @@ Copy `backend/.env.example` to `backend/.env` and fill in the LLM provider of yo
 - [x] Phase 4.1 - JobManager + REST API (`/api/projects`), SQLite persistence (projects, executions,
       agent_runs, artifacts), event bus, PDF/DOCX export, API tests
 - [x] Phase 4.2 - React dashboard (Vite + TypeScript, CSS design tokens): live pipeline view
-      with 1s polling, isometric pixel-art office scene, agent cards, artifact viewer, metrics
-      cards, projects history page, PDF/DOCX/JSON exports, toasts; `docs/future-scope.md`
+      with server-sent status (1s polling fallback), isometric pixel-art office scene, agent
+      cards, artifact viewer, metrics cards, projects history page, PDF/DOCX/JSON exports,
+      toasts; `docs/future-scope.md`
+- [x] Phase 5 - Push-based live status: `GET /api/projects/{id}/events` SSE stream backed by
+      the EventBus (snapshot per message, keepalive, closes on terminal status), client falls
+      back to polling when the stream is unavailable; `backend/tests` folded into the default
+      pytest run
 
 ## Architecture Invariant
 

@@ -25,8 +25,8 @@ Backend || Frontend parallelism is a future fan-out optimization.
 CLIENT (React + Vite + CSS design tokens)  dashboard, pipeline view, report viewer, history
         |  HTTP/JSON (CORS-restricted)
 API LAYER (FastAPI)                      /api/projects, /api/projects/{id}/status|report|artifacts,
-                                         /api/projects/{id}/export/pdf|docx, /api/settings,
-                                         /api/memory/search, /api/health
+                                         /api/projects/{id}/events (SSE), /api/projects/{id}/export/pdf|docx,
+                                         /api/settings, /api/memory/search, /api/health
 ORCHESTRATION (services/job_manager)     asyncio queue, single worker, status transitions
 AGENT LAYER (agents/)                    one module per node; prompt + schema + retry + fallback
 WORKFLOWS (workflows/)                   LangGraph StateGraph: AutoDevState + build_graph()
@@ -50,7 +50,7 @@ Every agent returns **structured JSON validated by a Pydantic model - never free
 ```
 idea -> POST /api/projects -> 202 {job_id, project_id}
   -> JobManager enqueues -> LangGraph graph streams -> nodes call LLM adapter
-  -> artifacts persisted (JSON + MD) -> EventBus transitions -> frontend polls every 1s
+  -> artifacts persisted (JSON + MD) -> EventBus transitions -> SSE pushes status to the frontend
   -> Report Generator composes markdown -> download MD / PDF / DOCX
 ```
 
@@ -62,6 +62,7 @@ idea -> POST /api/projects -> 202 {job_id, project_id}
 | GET | /api/projects | History |
 | GET | /api/projects/{id} | Meta + executions + agent runs + artifacts |
 | GET | /api/projects/{id}/status | Job status, current agent, progress |
+| GET | /api/projects/{id}/events | Server-sent job status stream |
 | GET | /api/projects/{id}/activity | Timeline steps per agent |
 | GET | /api/projects/{id}/report | Composed markdown |
 | GET | /api/projects/{id}/artifacts | Artifact list |

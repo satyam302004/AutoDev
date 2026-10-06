@@ -12,7 +12,8 @@ Ideas for the next iteration of AutoDev. Use as slide content for the final pres
 - **Cloud cost estimator** — per-service cost forecast before anything is deployed
 - **Jira / Linear integration** — turn generated plans into trackable tickets
 - **Slack notifications** — agent lifecycle events pushed to a channel
-- **WebSockets** — replace 1s polling with a push-based live event stream
+- ~~**WebSockets** — replace 1s polling with a push-based live event stream~~ **shipped as SSE**
+  (`GET /api/projects/{id}/events`); polling remains only as a fallback
 
 ## Platform Improvements
 
