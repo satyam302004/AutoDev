@@ -156,6 +156,7 @@ class QAOutput(BaseModel):
 
 
 class DocumentationOutput(BaseModel):
+    readme: str = ""
     installation: str = ""
     setup_guide: str = ""
     api_summary: str = ""
