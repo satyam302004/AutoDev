@@ -25,9 +25,9 @@ autodev/
 ├── backend/        FastAPI app (agents, api, core, services, models, schemas, prompts, workflows)
 ├── frontend/       React + Vite + Tailwind dashboard (live pipeline, history, exports)
 ├── prompts/        Single source of truth for all agent prompt templates
-├── docs/           PRD, Architecture, API, Database, Agents, UserGuide, future-scope
-├── tests/          Root-level pytest suite
-└── scripts/        run_backend.ps1, run_tests.ps1, seed_agents.py, export_reports.py
+├── docs/           PRD, Architecture, future-scope
+├── tests/          Root-level pytest suite (backend/tests holds the API suite)
+└── scripts/        run_backend.ps1, run_tests.ps1, seed_agents.py, smoke_api.py
 ```
 
 ## Backend Setup (Windows PowerShell)
@@ -100,9 +100,9 @@ Copy `backend/.env.example` to `backend/.env` and fill in the LLM provider of yo
       Backend/Frontend/QA/Documentation Engineers, Report Generator, tools, artifacts, quality/cost
 - [x] Phase 4.1 - JobManager + REST API (`/api/projects`), SQLite persistence (projects, executions,
       agent_runs, artifacts), event bus, PDF/DOCX export, API tests
-- [x] Phase 4.2 - React dashboard (Vite + TypeScript + Tailwind): live pipeline view with 1s
-      polling, agent detail/explainability panel, artifact viewer, metrics cards, timeline,
-      projects history page, PDF/DOCX/JSON exports, dark mode, toasts; `docs/future-scope.md`
+- [x] Phase 4.2 - React dashboard (Vite + TypeScript, CSS design tokens): live pipeline view
+      with 1s polling, isometric pixel-art office scene, agent cards, artifact viewer, metrics
+      cards, projects history page, PDF/DOCX/JSON exports, toasts; `docs/future-scope.md`
 
 ## Architecture Invariant
 
