@@ -77,6 +77,18 @@ cd frontend
 npm run test:e2e
 ```
 
+### Secret guard (githooks/pre-commit)
+
+A tracked, dependency-free pre-commit hook refuses commits that stage an `.env` file
+(`.env.example` is allowed) or add a line matching a known credential shape. Activate it
+once per clone:
+
+```powershell
+git config core.hooksPath githooks
+```
+
+Reviewed false positive: `git commit --no-verify`.
+
 ## Frontend (dashboard)
 
 ```powershell

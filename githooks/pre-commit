@@ -1,0 +1,43 @@
+#!/bin/sh
+# AutoDEV pre-commit secret guard.
+#
+# Blocks commits that (a) stage an environment file other than the template, or
+# (b) add a line matching a known credential shape. Dependency-free on purpose:
+# it only needs git and grep, so it works on a fresh clone without tooling.
+#
+# Bypass deliberately for a reviewed false positive:  git commit --no-verify
+
+fail=0
+
+# 1) Never allow an environment file. The template (.env.example) is allowed.
+env_files=$(git diff --cached --name-only --diff-filter=ACM | \
+  grep -E '(^|/)\.env(\..*)?$' | grep -vE '\.env\.example$' || true)
+
+if [ -n "$env_files" ]; then
+  echo "" >&2
+  echo "pre-commit: refusing to stage environment file(s):" >&2
+  echo "$env_files" | sed 's/^/    /' >&2
+  fail=1
+fi
+
+# 2) Scan added lines of staged text for common credential shapes.
+#    OpenAI/Zen, Google, GitHub PATs and classic tokens, Slack, AWS, private keys.
+patterns='sk-[A-Za-z0-9_-]{20,}|AIza[A-Za-z0-9_-]{30,}|ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|gho_[A-Za-z0-9]{30,}|xox[baprs]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----'
+
+hits=$(git diff --cached -U0 --diff-filter=ACM | grep -EI "^[+]($patterns|.*[^A-Za-z0-9_/-]($patterns)[^A-Za-z0-9_/-]|\`$patterns)" || true)
+
+if [ -n "$hits" ]; then
+  echo "" >&2
+  echo "pre-commit: possible credential detected in staged changes:" >&2
+  echo "$hits" | sed 's/^/    /' >&2
+  fail=1
+fi
+
+if [ "$fail" -ne 0 ]; then
+  echo "" >&2
+  echo "Nothing has been committed." >&2
+  echo "If this is a reviewed false positive, re-run with:  git commit --no-verify" >&2
+  exit 1
+fi
+
+exit 0
