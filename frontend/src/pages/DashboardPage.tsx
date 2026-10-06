@@ -3,6 +3,7 @@ import { createProject, deleteProject, getArtifacts, getProject, getStatus } fro
 import type { Artifact, JobStatus, ProjectDetail } from '../types';
 import { useProjectsData } from '../hooks/useProjectsData';
 import { usePolling } from '../hooks/usePolling';
+import { useProjectEvents } from '../hooks/useProjectEvents';
 import { useToast } from '../components/Toasts';
 import { PixelPanel } from '../components/ui/PixelPanel';
 import { PixelButton } from '../components/ui/PixelButton';
@@ -41,9 +42,17 @@ export function DashboardPage() {
   const [techPreferences, setTechPreferences] = useState('');
 
   const running = jobStatus?.status === 'running' || jobStatus?.status === 'pending';
+  const watching = selectedId !== null && running;
 
   const statusFetcher = useCallback(() => getStatus(selectedId ?? ''), [selectedId]);
-  usePolling(statusFetcher, 1000, selectedId !== null && running, (s) => setJobStatus(s));
+  // SSE is the primary transport; the 1s loop only runs when the stream is not
+  // delivering (unsupported EventSource, proxy buffering, connection error).
+  const sseLive = useProjectEvents({
+    projectId: selectedId,
+    active: watching,
+    onData: setJobStatus,
+  });
+  usePolling(statusFetcher, 1000, watching && !sseLive, (s) => setJobStatus(s));
 
   const loadResults = useCallback(
     async (id: string, notify: 'success' | 'error' | null) => {

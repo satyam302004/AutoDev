@@ -45,8 +45,15 @@ export function repeatedRunning(completed: number, count: number, progress: numb
   )
 }
 
-export function mockStatusFlow(page: Page, projectId: string, items: JobStatus[]) {
+export async function mockStatusFlow(page: Page, projectId: string, items: JobStatus[]) {
   let index = 0
+  // The dashboard prefers server-sent events over polling. Serve an empty but
+  // well-formed stream so the client takes its 1s polling fallback immediately:
+  // that keeps these specs driving the scripted sequence, and a 200 response
+  // avoids the failed-request console error that several specs assert against.
+  await page.route(`**/api/projects/${projectId}/events`, (route) =>
+    route.fulfill({ status: 200, contentType: 'text/event-stream', body: '' }),
+  )
   return page.route(`**/api/projects/${projectId}/status`, async (route) => {
     const item = items[Math.min(index, items.length - 1)]
     index += 1
