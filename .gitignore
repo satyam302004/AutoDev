@@ -11,9 +11,9 @@ backend/.venv/
 !.env.example
 
 # Data
-backend/*.db
-backend/*.db-wal
-backend/*.db-shm
+*.db
+*.db-wal
+*.db-shm
 
 # Logs
 *.log
