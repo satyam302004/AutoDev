@@ -1,5 +1,8 @@
+import asyncio
+import json
+
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import Response
+from fastapi.responses import Response, StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.core.container import get_job_manager_dep
@@ -27,6 +30,9 @@ from app.services.export import build_docx_bytes, build_pdf_bytes
 from app.services.job_manager import STEP_TOTAL, JobManager
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
+
+TERMINAL_STATUSES = ("completed", "failed")
+SSE_KEEPALIVE_S = 15.0
 
 
 def _load_project_or_404(session: Session, project_id: str):
@@ -105,13 +111,10 @@ def get_project(
     )
 
 
-@router.get("/{project_id}/status", response_model=JobStatusResponse)
-async def project_status(
-    project_id: str,
-    manager: JobManager = Depends(get_job_manager_dep),
-    session: Session = Depends(get_session),
+def _status_payload(
+    manager: JobManager, project_id: str, fallback_status: str
 ) -> JobStatusResponse:
-    project = _load_project_or_404(session, project_id)
+    """Single source of truth for job status, shared by /status and /events."""
     job = manager.get_by_project(project_id)
     if job is not None:
         return JobStatusResponse(
@@ -124,15 +127,91 @@ async def project_status(
             progress=job.progress,
             error=job.error,
         )
-    completed = STEP_TOTAL if project.status in ("completed", "failed") else 0
+    completed = STEP_TOTAL if fallback_status in TERMINAL_STATUSES else 0
     return JobStatusResponse(
         job_id="",
         project_id=project_id,
-        status=project.status,
+        status=fallback_status,
         current_agent=None,
         completed=completed,
         total=STEP_TOTAL,
         progress=round(completed / max(STEP_TOTAL, 1), 2),
+    )
+
+
+@router.get("/{project_id}/status", response_model=JobStatusResponse)
+async def project_status(
+    project_id: str,
+    manager: JobManager = Depends(get_job_manager_dep),
+    session: Session = Depends(get_session),
+) -> JobStatusResponse:
+    project = _load_project_or_404(session, project_id)
+    return _status_payload(manager, project_id, project.status)
+
+
+@router.get("/{project_id}/events")
+async def project_events(
+    project_id: str,
+    manager: JobManager = Depends(get_job_manager_dep),
+    session: Session = Depends(get_session),
+) -> StreamingResponse:
+    """Server-sent job status. Emits a full status snapshot per message so the
+    client can apply it idempotently, then closes once the run reaches a
+    terminal state (the client treats that as 'stop listening')."""
+    project = _load_project_or_404(session, project_id)
+    fallback_status = project.status
+
+    queue: asyncio.Queue[str] = asyncio.Queue(maxsize=64)
+
+    def snapshot() -> str:
+        return _status_payload(manager, project_id, fallback_status).model_dump_json()
+
+    async def on_event(event) -> None:
+        if event.project_id != project_id:
+            return
+        payload = snapshot()
+        try:
+            queue.put_nowait(payload)
+        except asyncio.QueueFull:
+            # Slow consumer: drop the oldest update and keep the newest.
+            try:
+                queue.get_nowait()
+            except asyncio.QueueEmpty:
+                pass
+            queue.put_nowait(payload)
+
+    async def stream():
+        # Subscribe inside the generator: if the client vanishes before the
+        # body ever runs, Starlette closes a never-started generator and the
+        # finally below would never execute - leaking the subscriber.
+        manager.event_bus.subscribe(on_event)
+        try:
+            # Immediate snapshot so the UI is correct before any event fires.
+            payload = snapshot()
+            yield f"data: {payload}\n\n"
+            if json.loads(payload).get("status") in TERMINAL_STATUSES:
+                return
+            while True:
+                try:
+                    payload = await asyncio.wait_for(queue.get(), timeout=SSE_KEEPALIVE_S)
+                except asyncio.TimeoutError:
+                    yield ": ping\n\n"
+                    continue
+                yield f"data: {payload}\n\n"
+                if json.loads(payload).get("status") in TERMINAL_STATUSES:
+                    return
+        finally:
+            manager.event_bus.unsubscribe(on_event)
+
+    return StreamingResponse(
+        stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            # disable proxy buffering so events flush immediately
+            "X-Accel-Buffering": "no",
+        },
     )
 
 

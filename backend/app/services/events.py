@@ -32,6 +32,18 @@ class EventBus:
     def subscribe(self, callback: Subscriber) -> None:
         self._subscribers.append(callback)
 
+    def unsubscribe(self, callback: Subscriber) -> None:
+        """Detach a subscriber. Safe to call from a running publish loop:
+        publish() iterates over a snapshot of the list."""
+        try:
+            self._subscribers.remove(callback)
+        except ValueError:
+            pass
+
+    @property
+    def subscriber_count(self) -> int:
+        return len(self._subscribers)
+
     async def publish(self, event: Event) -> None:
         for callback in list(self._subscribers):
             try:

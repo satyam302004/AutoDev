@@ -28,15 +28,24 @@ def session(engine):
 
 
 @pytest.fixture()
-def client(engine):
+def client_session(engine):
+    """Session backing the overridden get_session. Exposed so tests can mutate
+    rows the client will subsequently read."""
     connection = engine.connect()
     transaction = connection.begin()
     Session = sessionmaker(bind=connection)
     session = Session()
+    yield session
+    session.close()
+    transaction.rollback()
+    connection.close()
 
+
+@pytest.fixture()
+def client(client_session):
     def override_get_session():
         try:
-            yield session
+            yield client_session
         finally:
             pass
 
@@ -44,6 +53,3 @@ def client(engine):
     with TestClient(app) as client:
         yield client
     app.dependency_overrides.clear()
-    session.close()
-    transaction.rollback()
-    connection.close()
